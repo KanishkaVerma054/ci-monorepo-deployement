@@ -9,9 +9,21 @@ jobs:
     name: Deploying everything to the staging cluster
     steps:
       - run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" &> ~/ssh_key
-          sudo mkdir -p /home/ubuntu/.ssh
-          ls /home/ubuntu/.ssh
-          touch /home/ubuntu/.ssh/known_hosts
-          echo "${{ secrets.KNOWN_HOSTS }}" &> /home/ubuntu/.ssh/known_hosts
-          ssh -i ~/ssh_key ubuntu@18.181.77.140 "cd week-25-ci-next-app/ && git pull origin main && export PATH=/home/ubuntu/.nvm/versions/node/v22.14.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin && npm install -g pnpm && pnpm install && pnpm run build && pm2 restart fe-sever && pm2 restart http-sever && pm2 restart ws-sever"
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/ssh_key
+          chmod 600 ~/ssh_key
+          mkdir -p /home/runner/.ssh
+
+          # Automatically fetch and add the host key
+          ssh-keyscan 64.227.147.124 >> /home/runner/.ssh/known_hosts
+
+          chmod 644 /home/runner/.ssh/known_hosts
+
+          ssh -i ~/ssh_key -T ubuntu@64.227.147.124 "
+            cd week-25-ci-next-app/ &&
+            git pull origin main &&
+            pnpm install &&
+            pnpm run build &&
+            pm2 restart fe-server &&
+            pm2 restart http-server &&
+            pm2 restart ws-server
+          "
