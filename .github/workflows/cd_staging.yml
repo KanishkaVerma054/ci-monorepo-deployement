@@ -9,21 +9,9 @@ jobs:
     name: Deploying everything to the staging cluster
     steps:
       - run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/ssh_key
+          echo "Checking if SSH key is correct..."
+          ls -lah ~/ssh_key
+          cat ~/ssh_key | head -n 5  # Print first few lines (DO NOT show full key for security)
           chmod 600 ~/ssh_key
-          mkdir -p /home/runner/.ssh
+          ssh -v -i ~/ssh_key ubuntu@64.227.147.124 "echo 'SSH connection successful'"
 
-          # Automatically fetch and add the host key
-          ssh-keyscan 64.227.147.124 >> /home/runner/.ssh/known_hosts
-
-          chmod 644 /home/runner/.ssh/known_hosts
-
-          ssh -i ~/ssh_key -T ubuntu@64.227.147.124 "
-            cd week-25-ci-next-app/ &&
-            git pull origin main &&
-            pnpm install &&
-            pnpm run build &&
-            pm2 restart fe-server &&
-            pm2 restart http-server &&
-            pm2 restart ws-server
-          "
