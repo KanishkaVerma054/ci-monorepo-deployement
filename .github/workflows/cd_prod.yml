@@ -1,0 +1,33 @@
+name: Deploy to staging
+on:
+  push:
+    branches: [ production ]
+
+jobs:
+  redeploy_everything:
+    runs-on: ubuntu-latest
+    name: Deploying everything to the staging cluster
+    steps:
+      - run: |
+          echo "Setting up SSH key..."
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/ssh_key
+          chmod 600 ~/ssh_key  # Correcting the chmod path
+          
+          echo "Setting up known hosts..."
+          mkdir -p ~/.ssh
+          touch ~/.ssh/known_hosts
+          echo "${{ secrets.KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+          echo "Connecting to the server..."
+          ssh -i ~/ssh_key -T ubuntu@35.78.75.90 "
+            cd ci-monorepo-deployement/ &&
+            git pull origin production &&
+            export PATH=/home/ubuntu/.nvm/versions/node/v22.14.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin &&
+            npm install -g pnpm &&
+            pnpm install &&
+            pnpm run build &&
+            pm2 restart fe-server &&
+            pm2 restart http-server &&
+            pm2 restart ws-server
+          "
