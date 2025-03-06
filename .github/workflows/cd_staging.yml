@@ -1,8 +1,7 @@
 name: Deploy to stageing
 on:
     push:
-        branches:
-            - "main"
+        branches: [ main ]
 
 jobs:
     redploy_everything:
@@ -11,7 +10,7 @@ jobs:
 
         steps: 
             - run: \
-                echo ${{ secrets.SSH_PRIVATE_KEY}} &> ~/ssh_key
+                echo "${{ secrets.SSH_PRIVATE_KEY}}" &> ~/ssh_key
                 ssh -i ~/ssh_key ubuntu@18.181.77.140
                 cd ci-monorepo-deployement/ && git pull
                 pnpm install
