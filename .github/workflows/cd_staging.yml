@@ -21,7 +21,7 @@ jobs:
 
           echo "Connecting to the server..."
           ssh -i ~/ssh_key -T ubuntu@18.181.77.140 "
-            cd week-25-ci-next-app/ &&
+            cd ci-monorepo-deployement/ &&
             git pull origin main &&
             export PATH=/home/ubuntu/.nvm/versions/node/v22.14.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin &&
             npm install -g pnpm &&
